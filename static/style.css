@@ -1,101 +1,166 @@
-/* Import a modern font from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
-
+/* Reset default styles */
 * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
-  background: linear-gradient(135deg, #ece9e6, #ffffff);
-  font-family: 'Roboto', sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  color: #333;
-  padding: 20px;
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7fa;
+    color: #333;
+    line-height: 1.6;
+    padding: 20px;
 }
 
+/* Container */
 .container {
-  background-color: #fff;
-  padding: 40px 60px;
-  border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  max-width: 500px;
-  width: 90%;
-  text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* Heading */
 h1 {
-  margin-bottom: 20px;
-  font-size: 1.8em;
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 1.8em;
 }
 
-p {
-  font-size: 1.1em;
-  margin-bottom: 20px;
+/* Status Box */
+.status-box {
+    background: #ecf0f1;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
 }
 
-.form {
-  margin-bottom: 30px;
+.status-box p {
+    margin: 10px 0;
+    font-size: 1.1em;
 }
 
-label {
-  font-size: 1.1em;
-  margin-right: 10px;
+.status {
+    font-weight: bold;
 }
 
-select {
-  padding: 8px 12px;
-  font-size: 1em;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #f9f9f9;
-  outline: none;
-  transition: border-color 0.3s ease;
+.status.active {
+    color: #27ae60;
 }
 
-select:focus {
-  border-color: #007bff;
+.status.inactive {
+    color: #7f8c8d;
 }
 
+.label {
+    font-weight: bold;
+    color: #2980b9;
+}
+
+/* Form Group */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 1.1em;
+    color: #34495e;
+}
+
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    border: 2px solid #bdc3c7;
+    border-radius: 5px;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+.form-group select:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+/* Button Group */
 .button-group {
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.button-form {
+    display: inline-block;
 }
 
 .btn {
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  padding: 12px 24px;
-  font-size: 1em;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  margin: 5px;
+    padding: 12px 24px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
 }
 
-.btn:hover {
-  background-color: #0056b3;
-  transform: scale(1.02);
+.btn-start {
+    background-color: #2ecc71;
+    color: #fff;
 }
 
-/* Media query for mobile devices */
-@media (max-width: 600px) {
-  .container {
-    padding: 20px 30px;
-  }
-  h1 {
-    font-size: 1.5em;
-  }
-  p, label, select, .btn {
-    font-size: 0.9em;
-  }
-  .btn {
-    padding: 10px 20px;
-  }
+.btn-start:hover:not(:disabled) {
+    background-color: #27ae60;
+    transform: translateY(-2px);
+}
+
+.btn-stop {
+    background-color: #e74c3c;
+    color: #fff;
+}
+
+.btn-stop:hover:not(:disabled) {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+}
+
+.btn:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .container {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
+
+    .status-box p {
+        font-size: 1em;
+    }
+
+    .form-group select {
+        font-size: 0.9em;
+        padding: 8px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+
+    .button-group {
+        flex-direction: column;
+        gap: 15px;
+    }
 }
