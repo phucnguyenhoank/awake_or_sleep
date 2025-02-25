@@ -92,7 +92,7 @@ void loop()
     // Check if buffer is full
     // Serial.print("NO SENTTTTTT\n");
     checkIsCollecting(); // check if server want to collect data, change the collectingData to true to start collecting
-    delay(1000);
+    delay(500);
     
   }
   else if (currentTime - lastSampleTime >= 20)

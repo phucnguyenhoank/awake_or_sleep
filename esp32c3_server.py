@@ -94,7 +94,7 @@ def set_label():
 @app.route("/data", methods=["POST"])
 def receive_data():
     global data
-    raw_data = request.data
+    # raw_data = request.data
     # print("Raw data received:", raw_data[:200])  # First 200 bytes for brevity
     # print("Raw data length:", len(raw_data))
     try:
@@ -127,7 +127,7 @@ def calculate_remaining_time():
 def save_data_to_csv():
     global data, csv_file
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    csv_file = f"data_{timestamp}.csv"
+    csv_file = f"./aos_data/phuc_{timestamp}.csv"
     if data and csv_file:
         with open(csv_file, "w", newline="") as f:
             writer = csv.writer(f)
