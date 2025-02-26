@@ -127,7 +127,7 @@ def calculate_remaining_time():
 def save_data_to_csv():
     global data, csv_file
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    csv_file = f"./aos_data/phuc_{timestamp}.csv"
+    csv_file = f"./real_awake_aos_data/phuc_{timestamp}.csv"
     if data and csv_file:
         with open(csv_file, "w", newline="") as f:
             writer = csv.writer(f)
