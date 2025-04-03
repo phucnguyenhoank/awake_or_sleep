@@ -153,11 +153,6 @@ void sendData() {
   http.begin(dataUrl);
   http.addHeader("Content-Type", "application/json");
 
-  // Debug: Check buffer size
-  // Serial.print("Sending buffer with ");
-  // Serial.print(bufferIndex);
-  // Serial.println(" samples");
-
   // Allocate JSON document
   const size_t capacity = JSON_ARRAY_SIZE(bufferIndex) + bufferIndex * JSON_OBJECT_SIZE(7);
   DynamicJsonDocument doc(capacity);
@@ -178,12 +173,6 @@ void sendData() {
   // Serialize to string
   String json;
   serializeJson(doc, json);
-
-  // Debug: Print JSON payload
-  // Serial.print("JSON payload: ");
-  // Serial.println(json);
-  // Serial.print("JSON length: ");
-  // Serial.println(json.length());
 
   // Send POST request
   int code = http.POST(json);

@@ -94,14 +94,11 @@ def set_label():
 @app.route("/data", methods=["POST"])
 def receive_data():
     global data
-    # raw_data = request.data
-    # print("Raw data received:", raw_data[:200])  # First 200 bytes for brevity
-    # print("Raw data length:", len(raw_data))
     try:
         received_data = request.get_json(force=True)  # Force parsing even if content-type is off
         # print("Parsed data (first 5 entries):", received_data[:5])  # First 5 for brevity
         timestamped_data = [
-            {**entry, "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Label": label}
+            {**entry, "SavedTime": datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Label": label}
             for entry in received_data
         ]
         data.extend(timestamped_data)
@@ -127,16 +124,14 @@ def calculate_remaining_time():
 def save_data_to_csv():
     global data, csv_file
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    csv_file = f"./real_awake_aos_data/phuc_{timestamp}.csv"
+    csv_file = f"./aos_data/phuc_{timestamp}.csv"
     if data and csv_file:
         with open(csv_file, "w", newline="") as f:
             writer = csv.writer(f)
-            # Write header with Timestamp and Label
-            writer.writerow(["Timestamp", "Label", "AccelX", "AccelY", "AccelZ", "GyroX", "GyroY", "GyroZ", "IR"])
-            # Write data with timestamps and label
+            writer.writerow(["SavedTime", "Timestamp", "Label", "AccelX", "AccelY", "AccelZ", "GyroX", "GyroY", "GyroZ", "IR"])
             for entry in data:
                 writer.writerow([
-                    entry["Timestamp"], entry["Label"],
+                    entry["SavedTime"], entry["Timestamp"], entry["Label"],
                     entry["AccelX"], entry["AccelY"], entry["AccelZ"],
                     entry["GyroX"], entry["GyroY"], entry["GyroZ"],
                     entry["IR"]

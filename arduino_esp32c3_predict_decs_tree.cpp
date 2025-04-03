@@ -93,32 +93,32 @@ int predict(float accelX, float accelY, float accelZ, float gyroX, float gyroY, 
 
 void setup() {
     // Initialize serial communication
-    Serial.begin(115200);
-    while (!Serial) {
-        delay(10);  // Wait for serial to connect
-    }
+    // Serial.begin(115200);
+    // while (!Serial) {
+    //     delay(10);  // Wait for serial to connect
+    // }
 
     // Initialize I2C
     Wire.begin(SDA_PIN, SCL_PIN);
 
     // Initialize MPU6050
     if (!mpu.begin()) {
-        Serial.println("MPU6050 not found!");
+        // Serial.println("MPU6050 not found!");
         while (1) { delay(10); }
     }
     mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
     mpu.setGyroRange(MPU6050_RANGE_500_DEG);
     mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
-    Serial.println("MPU6050 initialized");
+    // Serial.println("MPU6050 initialized");
 
     // Initialize MAX30102
     if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) {
-        Serial.println("MAX30102 not found!");
+        // Serial.println("MAX30102 not found!");
         while (1) { delay(10); }
     }
     particleSensor.setup(0x1F, 1, 2, 400, 411, 4096);  // Mode 2: Red + IR
     particleSensor.clearFIFO();
-    Serial.println("MAX30102 initialized");
+    // Serial.println("MAX30102 initialized");
 
     // RGB LED
     // Set RGB pins as output
@@ -146,9 +146,9 @@ void loop() {
     int result = predict(accelX, accelY, accelZ, gyroX, gyroY, gyroZ, ir);
 
     // Output result
-    Serial.print("Prediction: ");
+    // Serial.print("Prediction: ");
 
-    Serial.println(result ? "Awake" : "Sleep");
+    // Serial.println(result ? "Awake" : "Sleep");
     if (result) {
       setColor(0, 255, 0, 10);
     }
@@ -157,9 +157,9 @@ void loop() {
     }
 
     // Optional: Print sensor values for debugging
-    Serial.print("AccelX: "); Serial.print(accelX);
-    Serial.print(", GyroY: "); Serial.print(gyroY);
-    Serial.print(", IR: "); Serial.println(ir);
+    // Serial.print("AccelX: "); // Serial.print(accelX);
+    // Serial.print(", GyroY: "); // Serial.print(gyroY);
+    // Serial.print(", IR: "); // Serial.println(ir);
 
     delay(1000);  // Delay 1 second between predictions
 }
