@@ -16,7 +16,7 @@ def scan_network(target_ip):
     return devices
 
 # Scan the network range
-devices = scan_network("192.168.75.1/24")
+devices = scan_network("192.168.116.1/24")
 
 print("Devices found:")
 for device in devices:
