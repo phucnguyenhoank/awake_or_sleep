@@ -1,5 +1,5 @@
 #include <WiFi.h>
-#include <HTTPClient.h>
+#include <WiFiUdp.h>
 #include <Wire.h>
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
@@ -17,20 +17,21 @@ Adafruit_MPU6050 mpu;
 MAX30105 particleSensor;
 
 // Global variables
-bool collectingData = false;
+bool collectingData = true;  // Set to true (or update logic as needed)
 unsigned long lastSampleTime = 0;
 
 // Wi-Fi credentials
-const char* ssid = "tesla2";      // New SSID
-const char* password = "teslatesla";
+const char* ssid = "newton";
+const char* password = "newtonewton";
 
-// Server addresses (ensure these are reachable in your new network)
-const char *isCollectingDataUrl = "http://192.168.65.230:5000/is_collecting_data";
-const char *dataUrl = "http://192.168.65.230:5000/data";
+// UDP server parameters
+const char* udpAddress = "192.168.65.230";  // Update to your server's IP
+const int udpPort = 5001;
+WiFiUDP udp;
 
-// Buffer
+// Buffer structure and global buffer
 struct SensorData {
-  unsigned long timestamp;  // Added timestamp field
+  unsigned long timestamp;
   float accelX, accelY, accelZ;
   float gyroX, gyroY, gyroZ;
   long ir;
@@ -39,7 +40,6 @@ struct SensorData {
 const int BUFFER_SIZE = 400;
 SensorData buffer[BUFFER_SIZE];
 int bufferIndex = 0;
-
 
 void setup() {
   // Serial.begin(115200);
@@ -50,22 +50,22 @@ void setup() {
   pinMode(GREEN_PIN, OUTPUT);
   pinMode(BLUE_PIN, OUTPUT);
   
-
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     setColor(0, 255, 0, 50);  // Green = trying
     delay(250);
-    setColor(0, 0, 0, 50);  // Blue = blinking
+    setColor(0, 0, 0, 50);  // Off
     delay(250);
   }
-
   delay(500);
+
+  // Start UDP (optional – not strictly needed on the client side)
+  udp.begin(WiFi.localIP(), udpPort);
 
   Wire.begin(SDA_PIN, SCL_PIN); // SDA, SCL pins for ESP32-C3
 
   // Initialize MPU6050
   if (!mpu.begin()) {
-    // Serial.println("MPU6050 not found!");
     while (1) { delay(10); }
   }
   mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
@@ -74,74 +74,43 @@ void setup() {
 
   // Initialize MAX30102
   if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) {
-    // Serial.println("MAX30102 not found!");
     while (1) { delay(10); }
   }
   particleSensor.setup(0x1F, 1, 2, 400, 411, 4096);  // Mode 2: Red + IR
   particleSensor.clearFIFO();
-
-  checkIsCollecting();
 }
 
 void loop() {
   unsigned long currentTime = millis();
 
-  if (!collectingData) {
-    checkIsCollecting();
-    delay(1000);
-    
-  } else if (currentTime - lastSampleTime >= 20) {
+  if (collectingData && currentTime - lastSampleTime >= 20) {
     lastSampleTime = currentTime;
     sensors_event_t a, g, temp;
     mpu.getEvent(&a, &g, &temp);
     long irValue = particleSensor.getIR();
 
-    // Include timestamp in the buffer
+    // Save sensor readings in buffer with a timestamp
     buffer[bufferIndex] = {currentTime, a.acceleration.x, a.acceleration.y, a.acceleration.z,
                            g.gyro.x, g.gyro.y, g.gyro.z, irValue};
     bufferIndex++;
-    if (bufferIndex == BUFFER_SIZE) {
+
+    if (bufferIndex >= BUFFER_SIZE) {
       sendData();
       bufferIndex = 0;
-      checkIsCollecting();
     }
   }
-}
-
-void checkIsCollecting() {
-  HTTPClient http;
-  http.begin(isCollectingDataUrl);
-  int httpResponseCode = http.GET();
-  if (httpResponseCode == 200) {
-    String response = http.getString();
-    if (response == "false") {
-      collectingData = false;
-      // Serial.println("Finish collection.");
-    } else {
-      collectingData = true;
-      // Serial.println("Collecting...");
-    }
-  } else {
-    // Serial.print("Error checking command: ");
-    // Serial.println(httpResponseCode);
-  }
-  http.end();
 }
 
 void sendData() {
-  HTTPClient http;
-  http.begin(dataUrl);
-  http.addHeader("Content-Type", "application/json");
-
-  // Allocate JSON document with updated capacity for 8 fields
+  // Allocate JSON document with an estimate for capacity
   const size_t capacity = JSON_ARRAY_SIZE(bufferIndex) + bufferIndex * JSON_OBJECT_SIZE(8);
   DynamicJsonDocument doc(capacity);
 
-  // Create JSON array
+  // Create a JSON array and add buffered sensor data
   JsonArray dataArray = doc.to<JsonArray>();
   for (int i = 0; i < bufferIndex; i++) {
     JsonObject entry = dataArray.createNestedObject();
-    entry["Timestamp"] = buffer[i].timestamp;  // Add timestamp to JSON
+    entry["Timestamp"] = buffer[i].timestamp;
     entry["AccelX"] = buffer[i].accelX;
     entry["AccelY"] = buffer[i].accelY;
     entry["AccelZ"] = buffer[i].accelZ;
@@ -151,23 +120,14 @@ void sendData() {
     entry["IR"] = buffer[i].ir;
   }
 
-  // Serialize to string
+  // Serialize JSON document to string
   String json;
   serializeJson(doc, json);
 
-  // Send POST request
-  int code = http.POST(json);
-  if (code > 0) {
-    // Serial.println("Sent " + String(bufferIndex) + " samples");
-    // Serial.print("Server response: ");
-    // Serial.println(http.getString());
-  } else {
-    // Serial.print("Send error: ");
-    // Serial.println(code);
-    // Serial.println(http.errorToString(code));
-  }
-
-  http.end();
+  // Send JSON data via UDP
+  udp.beginPacket(udpAddress, udpPort);
+  udp.write(json.c_str());
+  udp.endPacket();
 }
 
 void setColor(uint8_t red, uint8_t green, uint8_t blue, uint8_t brightness) {
